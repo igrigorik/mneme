@@ -16,8 +16,11 @@ Gem::Specification.new do |s|
 
   s.add_dependency "goliath"
   s.add_dependency "redis"
+  s.add_dependency "yajl-ruby"
+  s.add_dependency "bloomfilter-rb"
 
   s.add_development_dependency "rspec"
+  s.add_development_dependency "em-http-request", ">= 1.0.0.beta.3"
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
