@@ -97,7 +97,10 @@ class Mneme < Goliath::API
           hashes: options['mneme']['hashes'].to_i
         }
 
-        env[period] = BloomFilter::Redis.new(opts)
+        env[period] = EventMachine::Synchrony::ConnectionPool.new(size: 10) do
+          BloomFilter::Redis.new(opts)
+        end
+
         env[period]
       end
 
