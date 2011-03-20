@@ -16,14 +16,14 @@ class Mneme < Goliath::API
   # use Goliath::Rack::Validation::RequiredParam, {:key => 'key'}
 
   PERIODS = 3
-  LENGTH  = 10
+  LENGTH  = 10 # seconds
 
   SIZE = 100
   BITS = 10
   HASHES = 7
   SEED   = 30
 
-  NAMESPACE = 'mneme'
+  NAMESPACE = 'test'
 
   def response(env)
     keys = [params.delete('key') || params.delete('key[]')].flatten
@@ -71,6 +71,9 @@ class Mneme < Goliath::API
   private
 
     def filter(n)
-      env["mneme-#{n}"] ||= BloomFilter::Redis.new(namespace: NAMESPACE, size: SIZE * BITS, seed: SEED, hashes: HASHES)
+      period = (Time.now.to_i / LENGTH) - n
+      period = "mneme-#{NAMESPACE}-#{period}"
+
+      env[period] ||= BloomFilter::Redis.new(namespace: NAMESPACE, size: SIZE * BITS, seed: SEED, hashes: HASHES)
     end
 end
