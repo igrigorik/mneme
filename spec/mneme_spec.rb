@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), '../lib/', 'mneme')
+require 'lib/mneme'
 require 'goliath/test_helper'
 
 describe Mneme do

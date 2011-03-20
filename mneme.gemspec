@@ -17,6 +17,7 @@ Gem::Specification.new do |s|
   s.add_dependency "goliath"
   s.add_dependency "redis"
   s.add_dependency "yajl-ruby"
+  s.add_dependency "hiredis"
   s.add_dependency "bloomfilter-rb"
 
   s.add_development_dependency "rspec"
