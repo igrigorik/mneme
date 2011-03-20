@@ -4,8 +4,6 @@ require 'yajl'
 require 'redis'
 require 'redis/connection/synchrony'
 require 'bloomfilter-rb'
-require 'yaml'
-
 
 class Mneme < Goliath::API
   use ::Rack::Reloader, 0 if Goliath.dev?
