@@ -1,6 +1,11 @@
 require 'goliath'
-require 'bloomfilter-rb'
 require 'yajl'
+
+require 'redis'
+require 'redis/connection/synchrony'
+require 'bloomfilter-rb'
+require 'yaml'
+
 
 class Mneme < Goliath::API
   use ::Rack::Reloader, 0 if Goliath.dev?
@@ -15,15 +20,23 @@ class Mneme < Goliath::API
   use Goliath::Rack::Validation::RequestMethod, %w(GET POST)
   # use Goliath::Rack::Validation::RequiredParam, {:key => 'key'}
 
-  PERIODS = 3
-  LENGTH  = 10 # seconds
+  def options_parser(opts, options)
+    options['mneme'] = {
+      'namespace' => 'default',
 
-  SIZE = 100
-  BITS = 10
-  HASHES = 7
-  SEED   = 30
+      'periods' => 3,
+      'length'  => 60,
 
-  NAMESPACE = 'test'
+      'size'    => 1000,
+      'bits'    => 10,
+      'hashes'  => 7,
+      'seed'    => 30
+    }
+
+    opts.on('-c', '--config FILE', "mneme configuration file") do |val|
+      options['mneme'].merge! Yajl::Parser.parse(IO.read(val))
+    end
+  end
 
   def response(env)
     keys = [params.delete('key') || params.delete('key[]')].flatten
@@ -40,7 +53,7 @@ class Mneme < Goliath::API
     keys.each do |key|
 
       present = false
-      PERIODS.times do |n|
+      options['mneme']['periods'].to_i.times do |n|
         if filter(n).key?(key)
           present = true
           break
@@ -64,16 +77,30 @@ class Mneme < Goliath::API
   end
 
   def update_filters(keys)
-    keys.each { |key| filter(1).insert key }
+    keys.each { |key| filter(0).insert key }
     [201, {}, '']
   end
 
   private
 
     def filter(n)
-      period = (Time.now.to_i / LENGTH) - n
-      period = "mneme-#{NAMESPACE}-#{period}"
+      period = (Time.now.to_i / options['mneme']['length'].to_i) - n
+      period = "mneme-#{options['mneme']['namespace']}-#{period}"
 
-      env[period] ||= BloomFilter::Redis.new(namespace: NAMESPACE, size: SIZE * BITS, seed: SEED, hashes: HASHES)
+      filter = if env.key? period
+        env[period]
+      else
+        opts = {
+          namespace: options['mneme']['namespace'],
+          size: options['mneme']['size'].to_i * options['mneme']['bits'].to_i,
+          seed: options['mneme']['seed'].to_i,
+          hashes: options['mneme']['hashes'].to_i
+        }
+
+        env[period] = BloomFilter::Redis.new(opts)
+        env[period]
+      end
+
+      filter
     end
 end
