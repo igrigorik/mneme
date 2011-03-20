@@ -26,30 +26,45 @@ class Mneme < Goliath::API
   NAMESPACE = 'mneme'
 
   def response(env)
-    logger.info "Processing: #{params}"
+    keys = [params.delete('key') || params.delete('key[]')].flatten
+    logger.info "Processing: #{keys}"
 
     case env[Goliath::Request::REQUEST_METHOD]
-      when 'GET' then
-        query_filters(env)
-      when 'POST' then
-        update_filters(env)
+      when 'GET'  then query_filters(keys)
+      when 'POST' then update_filters(keys)
     end
   end
 
-  def query_filters(env)
-    PERIODS.times do |n|
-      if key = filter(n).key?(env.params['key'])
-        return [200, {}, {response: 'found'}]
+  def query_filters(keys)
+    found, missing = [], []
+    keys.each do |key|
+
+      present = false
+      PERIODS.times do |n|
+        if filter(n).key?(key)
+          present = true
+          break
+        end
       end
 
-      logger.info "#{n} - #{key}"
+      if present
+        found << key
+      else
+        missing << key
+      end
     end
 
-    [404, {}, {response: 'not found'}]
+    code = case keys.size
+      when found.size then 200
+      when missing.size then 404
+      else 206
+    end
+
+    [code, {}, {found: found, missing: missing}]
   end
 
-  def update_filters(env)
-    filter(1).insert params['key']
+  def update_filters(keys)
+    keys.each { |key| filter(1).insert key }
     [201, {}, '']
   end
 
