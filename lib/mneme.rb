@@ -39,7 +39,7 @@ class Mneme < Goliath::API
     keys = [params.delete('key') || params.delete('key[]')].flatten.compact
     return [400, {}, {error: 'no key specified'}] if keys.empty?
 
-    logger.info "Processing: #{keys}"
+    logger.debug "Processing: #{keys}"
 
     case env[Goliath::Request::REQUEST_METHOD]
       when 'GET'  then query_filters(keys)
@@ -76,7 +76,11 @@ class Mneme < Goliath::API
   end
 
   def update_filters(keys)
-    keys.each { |key| filter(0).insert key }
+    keys.each do |key|
+      filter(0).insert key
+      logger.debug "Inserted new key: #{key}"
+    end
+
     [201, {}, '']
   end
 
