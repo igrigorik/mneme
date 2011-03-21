@@ -1,10 +1,13 @@
 require 'lib/mneme'
 require 'goliath/test_helper'
+require 'em-http/middleware/json_response'
 
 describe Mneme do
   include Goliath::TestHelper
 
   let(:err) { Proc.new { fail "API request failed" } }
+
+  EventMachine::HttpRequest.use EventMachine::Middleware::JSONResponse
 
   it 'responds to hearbeat' do
     with_api(Mneme) do
@@ -17,8 +20,7 @@ describe Mneme do
   it 'should require an error if no key is provided' do
     with_api(Mneme) do
       get_request({}, err) do |c|
-        b = Yajl::Parser.parse(c.response)
-        b.should include 'error'
+        c.response.should include 'error'
       end
     end
   end
@@ -28,8 +30,7 @@ describe Mneme do
       with_api(Mneme) do
         get_request({:query => {:key => 'missing'}}, err) do |c|
           c.response_header.status.should == 404
-          b = Yajl::Parser.parse(c.response)
-          b['missing'].should include 'missing'
+          c.response['missing'].should include 'missing'
         end
       end
     end
@@ -41,8 +42,7 @@ describe Mneme do
 
           get_request({:query => {:key => 'abc'}}, err) do |c|
             c.response_header.status.should == 200
-            b = Yajl::Parser.parse(c.response)
-            b['found'].should include 'abc'
+            c.response['found'].should include 'abc'
           end
         end
       end
@@ -55,11 +55,10 @@ describe Mneme do
       with_api(Mneme) do
         get_request({:query => {:key => ['a', 'b']}}, err) do |c|
           c.response_header.status.should == 404
-          b = Yajl::Parser.parse(c.response)
 
-          b['found'].should be_empty
-          b['missing'].should include 'a'
-          b['missing'].should include 'b'
+          c.response['found'].should be_empty
+          c.response['missing'].should include 'a'
+          c.response['missing'].should include 'b'
         end
       end
     end
