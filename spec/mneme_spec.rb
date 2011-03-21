@@ -14,6 +14,15 @@ describe Mneme do
     end
   end
 
+  it 'should require an error if no key is provided' do
+    with_api(Mneme) do
+      get_request({}, err) do |c|
+        b = Yajl::Parser.parse(c.response)
+        b.should include 'error'
+      end
+    end
+  end
+
   context 'single key' do
     it 'should return 404 on missing key' do
       with_api(Mneme) do

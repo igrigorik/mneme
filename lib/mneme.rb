@@ -16,7 +16,6 @@ class Mneme < Goliath::API
   use Goliath::Rack::ValidationError
 
   use Goliath::Rack::Validation::RequestMethod, %w(GET POST)
-  # use Goliath::Rack::Validation::RequiredParam, {:key => 'key'}
 
   def options_parser(opts, options)
     options['mneme'] = {
@@ -37,7 +36,9 @@ class Mneme < Goliath::API
   end
 
   def response(env)
-    keys = [params.delete('key') || params.delete('key[]')].flatten
+    keys = [params.delete('key') || params.delete('key[]')].flatten.compact
+    return [400, {}, {error: 'no key specified'}] if keys.empty?
+
     logger.info "Processing: #{keys}"
 
     case env[Goliath::Request::REQUEST_METHOD]
