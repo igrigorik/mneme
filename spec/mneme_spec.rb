@@ -6,11 +6,12 @@ describe Mneme do
   include Goliath::TestHelper
 
   let(:err) { Proc.new { fail "API request failed" } }
+  let(:api_options) { { :config => File.expand_path(File.join(File.dirname(__FILE__), '..', 'config.rb')) } }
 
   EventMachine::HttpRequest.use EventMachine::Middleware::JSONResponse
 
   it 'responds to hearbeat' do
-    with_api(Mneme) do
+    with_api(Mneme, api_options) do
       get_request({path: '/status'}, err) do |c|
         c.response.should match('OK')
       end
@@ -18,7 +19,7 @@ describe Mneme do
   end
 
   it 'should require an error if no key is provided' do
-    with_api(Mneme) do
+    with_api(Mneme, api_options) do
       get_request({}, err) do |c|
         c.response.should include 'error'
       end
@@ -27,7 +28,7 @@ describe Mneme do
 
   context 'single key' do
     it 'should return 404 on missing key' do
-      with_api(Mneme) do
+      with_api(Mneme, api_options) do
         get_request({:query => {:key => 'missing'}}, err) do |c|
           c.response_header.status.should == 404
           c.response['missing'].should include 'missing'
@@ -36,7 +37,7 @@ describe Mneme do
     end
 
     it 'should insert key into filter' do
-      with_api(Mneme) do
+      with_api(Mneme, api_options) do
         post_request({:query => {key: 'abc'}}) do |c|
           c.response_header.status.should == 201
 
@@ -52,7 +53,7 @@ describe Mneme do
   context 'multiple keys' do
 
     it 'should return 404 on missing keys' do
-      with_api(Mneme) do
+      with_api(Mneme, api_options) do
         get_request({:query => {:key => ['a', 'b']}}, err) do |c|
           c.response_header.status.should == 404
 
@@ -64,7 +65,7 @@ describe Mneme do
     end
 
     it 'should return 200 on found keys' do
-      with_api(Mneme) do
+      with_api(Mneme, api_options) do
         post_request({:query => {key: ['abc1', 'abc2']}}) do |c|
           c.response_header.status.should == 201
 
@@ -76,7 +77,7 @@ describe Mneme do
     end
 
     it 'should return 206 on mixed keys' do
-      with_api(Mneme) do
+      with_api(Mneme, api_options) do
         post_request({:query => {key: ['abc3']}}) do |c|
           c.response_header.status.should == 201
 
