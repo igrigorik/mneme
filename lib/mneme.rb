@@ -17,30 +17,11 @@ class Mneme < Goliath::API
 
   use Goliath::Rack::Validation::RequestMethod, %w(GET POST)
 
-  def options_parser(opts, options)
-    options['mneme'] = {
-      'namespace' => 'default',
-
-      'periods' => 3,
-      'length'  => 60,
-
-      'size'    => 1000,
-      'bits'    => 10,
-      'hashes'  => 7,
-      'seed'    => 30
-    }
-
-    opts.on('-c', '--config FILE', "mneme configuration file") do |val|
-      options['mneme'].merge! Yajl::Parser.parse(IO.read(val))
-    end
-  end
-
   def response(env)
     keys = [params.delete('key') || params.delete('key[]')].flatten.compact
     return [400, {}, {error: 'no key specified'}] if keys.empty?
 
     logger.debug "Processing: #{keys}"
-
     case env[Goliath::Request::REQUEST_METHOD]
       when 'GET'  then query_filters(keys)
       when 'POST' then update_filters(keys)
@@ -52,7 +33,7 @@ class Mneme < Goliath::API
     keys.each do |key|
 
       present = false
-      options['mneme']['periods'].to_i.times do |n|
+      config['periods'].to_i.times do |n|
         if filter(n).key?(key)
           present = true
           break
@@ -86,23 +67,26 @@ class Mneme < Goliath::API
 
   private
 
+    def epoch(n)
+      (Time.now.to_i / config['length']) - n
+    end
+
     def filter(n)
-      period = (Time.now.to_i / options['mneme']['length'].to_i) - n
-      period = "mneme-#{options['mneme']['namespace']}-#{period}"
+      period = "mneme-#{config['namespace']}-#{epoch(n)}"
 
       filter = if env.key? period
         env[period]
       else
         opts = {
-          namespace: options['mneme']['namespace'],
-          size: options['mneme']['size'].to_i * options['mneme']['bits'].to_i,
-          seed: options['mneme']['seed'].to_i,
-          hashes: options['mneme']['hashes'].to_i
+          namespace: config['namespace'],
+          size: config['size'] * config['bits'],
+          seed: config['seed'],
+          hashes: config['hashes']
         }
 
-        env[period] = EventMachine::Synchrony::ConnectionPool.new(size: 10) do
-          BloomFilter::Redis.new(opts)
-        end
+        # env[period] = EventMachine::Synchrony::ConnectionPool.new(size: 10) do
+        env[period] = BloomFilter::Redis.new(opts)
+        # end
 
         env[period]
       end
