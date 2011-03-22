@@ -1,23 +1,23 @@
 # -*- encoding: utf-8 -*-
 $:.push File.expand_path("../lib", __FILE__)
-require "mneme/version"
 
 Gem::Specification.new do |s|
   s.name        = "mneme"
-  s.version     = Mneme::VERSION
+  s.version     = "0.5.0"
   s.platform    = Gem::Platform::RUBY
-  s.authors     = ["TODO: Write your name"]
-  s.email       = ["TODO: Write your email address"]
+  s.authors     = ["Ilya Grigorik"]
+  s.email       = ["ilya@igvita.com"]
   s.homepage    = ""
-  s.summary     = %q{TODO: Write a gem summary}
-  s.description = %q{TODO: Write a gem description}
+  s.summary     = %q{abc}
+  s.description = %q{Write a gem description}
 
   s.rubyforge_project = "mneme"
 
   s.add_dependency "goliath"
+  s.add_dependency "hiredis"
+
   s.add_dependency "redis"
   s.add_dependency "yajl-ruby"
-  s.add_dependency "hiredis"
   s.add_dependency "bloomfilter-rb"
 
   s.add_development_dependency "rspec"
