@@ -1,3 +1,11 @@
 #!/usr/bin/env ruby
 
+begin
+  config_index = (ARGV.index('-c') || ARGV.index('--config')) + 1
+  ARGV[config_index] = File.absolute_path(ARGV[config_index])
+rescue
+  puts "Please specify a valid mneme configuration file (ex: -c config.rb)"
+  exit
+end
+
 system("/usr/bin/env ruby " + File.dirname(__FILE__) + '/../lib/mneme.rb' + ' ' + ARGV.join(" "))
