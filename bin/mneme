@@ -1,22 +1,3 @@
 #!/usr/bin/env ruby
 
-lib = File.expand_path(File.dirname(__FILE__) + '/../lib')
-$LOAD_PATH.unshift(lib) if File.directory?(lib) && !$LOAD_PATH.include?(lib)
-
-require 'mneme'
-
-klass = Mneme
-api = klass.new
-
-runner = Goliath::Runner.new(ARGV, api)
-runner.load_app do
-  klass.middlewares.each do |mw|
-    use(*(mw[0..1].compact), &mw[2])
-  end
-  run api
-end
-
-runner.load_plugins(klass.plugins)
-
-puts "Starting mneme server..."
-runner.run
+system("/usr/bin/env ruby " + File.dirname(__FILE__) + '/../lib/mneme.rb' + ' ' + ARGV.join(" "))
