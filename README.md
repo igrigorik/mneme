@@ -4,9 +4,11 @@
        1. Psychology: the retentive basis or basic principle in a mind or organism accounting for memory, persisting effect of memory of past events.
        2. Mythology: the Muse of memory, one of the original three Muses. Cf."Aoede, Melete."
 
-Mneme is an HTTP web-service for recording and identifying previously seen records - aka, duplicate detection. To achieve this goal in a scalable, and zero-maintenance manner, it is implemented via a collection of automatically rotated bloomfilters. By using a collection of bloomfilters, you can customize your false-positive error rate, as well as the amount of time you want your memory to perist (ex: remember all keys for last 6 hours).
+Mneme is an HTTP web-service for recording and identifying previously seen records - aka, duplicate detection. To achieve this goal in a scalable, and zero-maintenance manner, it is implemented via a collection of automatically rotated bloomfilters. By using a collection of bloomfilters, you can customize your false-positive error rate, as well as the amount of time you want your memory to perist (ex: remember all keys for the last 6 hours).
 
 To minimize the require memory footprint, mneme does not store the actual key names, instead each specified key is hashed and mapped onto the bloomfilter. For data storage, we use Redis getbit/setbit to efficiently store and retrieve bit-level data for each key. Couple this with Goliath app-server, and you have an out-of-the-box, high-performance, customizable duplicate filter.
+
+For more details: [Mneme: Scalable Duplicate Filtering Service](http://www.igvita.com/2011/03/24/mneme-scalable-duplicate-filtering-service )
 
 ## Sample configuration
 
@@ -40,11 +42,12 @@ That's it! You now have a mneme web service running on port 9000. Let's try quer
     $> curl "http://127.0.0.1:9000?key=abcd"
     {"found":["abcd"],"missing":[]}
 
-
 ## Performance & Memory requirements
 
- - The speed of storing a new key is: O(number of BF hashes) - aka, O(1)
- - The speed of retrieving a key is: O(number of filters * number of BF hashes) - aka, O(1)
+ - [Redis](http://redis.io/) is used as an in-memory datastore of the bloomfilter
+ - [Goliath](https://github.com/postrank-labs/goliath) provides the high-performance HTTP frontend
+ - The speed of storing a new key is: *O(number of BF hashes) - aka, O(1)*
+ - The speed of retrieving a key is: *O(number of filters * number of BF hashes) - aka, O(1)*
 
 Bloom filter is a space-efficient probabilistic data structure that is used to test whether an element is a member of a set. False positives are possible, but false negatives are not. Because we are using Redis as a backend, in-memory store for the filters, there is some extra overhead. Sample memory requirements:
 
