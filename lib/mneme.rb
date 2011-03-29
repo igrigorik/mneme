@@ -5,8 +5,8 @@ require 'redis'
 require 'redis/connection/synchrony'
 require 'bloomfilter-rb'
 
-require 'lib/mneme/helper'
-require 'lib/mneme/sweeper'
+require 'mneme/helper'
+require 'mneme/sweeper'
 
 class Mneme < Goliath::API
   include Mnemosyne::Helper
