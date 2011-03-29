@@ -3,7 +3,7 @@ $:.push File.expand_path("../lib", __FILE__)
 
 Gem::Specification.new do |s|
   s.name        = "mneme"
-  s.version     = "0.5.0"
+  s.version     = "0.5.1"
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Ilya Grigorik"]
   s.email       = ["ilya@igvita.com"]
