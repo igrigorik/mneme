@@ -23,6 +23,8 @@ For more details: [Mneme: Scalable Duplicate Filtering Service](http://www.igvit
     config['hashes']  = 7           # number of times each key will be hashed
     config['seed']    = 30          # seed value for the hash function
 
+    config['pool']    = 2           # number of concurrent Redis connections
+
 To learn more about Bloom filter configuration: [Scalable Datasets: Bloom Filters in Ruby](http://www.igvita.com/2008/12/27/scalable-datasets-bloom-filters-in-ruby/)
 
 ## Launching mneme
@@ -48,6 +50,8 @@ That's it! You now have a mneme web service running on port 9000. Let's try quer
  - [Goliath](https://github.com/postrank-labs/goliath) provides the high-performance HTTP frontend
  - The speed of storing a new key is: *O(number of BF hashes) - aka, O(1)*
  - The speed of retrieving a key is: *O(number of filters * number of BF hashes) - aka, O(1)*
+
+ - Sample ab benchmarks for single key lookup: [https://gist.github.com/895326](https://gist.github.com/895326)
 
 Bloom filter is a space-efficient probabilistic data structure that is used to test whether an element is a member of a set. False positives are possible, but false negatives are not. Because we are using Redis as a backend, in-memory store for the filters, there is some extra overhead. Sample memory requirements:
 
