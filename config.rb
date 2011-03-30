@@ -6,3 +6,5 @@ config['size']    = 1000
 config['bits']    = 10
 config['hashes']  = 7
 config['seed']    = 30
+
+config['pool'] = 2

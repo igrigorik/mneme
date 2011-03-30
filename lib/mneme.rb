@@ -12,8 +12,6 @@ class Mneme < Goliath::API
   include Mnemosyne::Helper
   plugin Mnemosyne::Sweeper
 
-  use ::Rack::Reloader, 0 if Goliath.dev?
-
   use Goliath::Rack::Params
   use Goliath::Rack::DefaultMimeType
   use Goliath::Rack::Formatters::JSON
@@ -85,7 +83,8 @@ class Mneme < Goliath::API
           hashes: config['hashes']
         }
 
-        env[Goliath::Constants::CONFIG][period] = EventMachine::Synchrony::ConnectionPool.new(size: 1) do
+        pool = config['pool'] || 1
+        env[Goliath::Constants::CONFIG][period] = EventMachine::Synchrony::ConnectionPool.new(size: pool) do
           BloomFilter::Redis.new(opts)
         end
       end
