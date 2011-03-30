@@ -75,8 +75,8 @@ class Mneme < Goliath::API
     def filter(n)
       period = epoch_name(config['namespace'], n, config['length'])
 
-      filter = if env.key? period
-        env[period]
+      filter = if env[Goliath::Constants::CONFIG].key? period
+        env[Goliath::Constants::CONFIG][period]
       else
         opts = {
           namespace: config['namespace'],
@@ -85,11 +85,9 @@ class Mneme < Goliath::API
           hashes: config['hashes']
         }
 
-        # env[period] = EventMachine::Synchrony::ConnectionPool.new(size: 10) do
-        env[period] = BloomFilter::Redis.new(opts)
-        # end
-
-        env[period]
+        env[Goliath::Constants::CONFIG][period] = EventMachine::Synchrony::ConnectionPool.new(size: 1) do
+          BloomFilter::Redis.new(opts)
+        end
       end
 
       filter
