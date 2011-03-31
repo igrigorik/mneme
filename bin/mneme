@@ -5,7 +5,7 @@ begin
   ARGV[config_index] = File.absolute_path(ARGV[config_index])
 rescue
   puts "Please specify a valid mneme configuration file (ex: -c config.rb)"
-  exit
+  exit if !(ARGV.index('-h') || ARGV.index('--config'))
 end
 
 system("/usr/bin/env ruby " + File.dirname(__FILE__) + '/../lib/mneme.rb' + ' ' + ARGV.join(" "))
