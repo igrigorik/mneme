@@ -13,7 +13,8 @@ Gem::Specification.new do |s|
 
   s.rubyforge_project = "mneme"
 
-  s.add_dependency "goliath"
+  s.add_dependency "goliath", ["= 0.9.1"]
+  s.add_dependency 'http_parser.rb', ["= 0.5.1"]
   s.add_dependency "hiredis"
 
   s.add_dependency "redis"
@@ -21,7 +22,7 @@ Gem::Specification.new do |s|
   s.add_dependency "bloomfilter-rb"
 
   s.add_development_dependency "rspec"
-  s.add_development_dependency "em-http-request", ">= 1.0.0.beta.3"
+  s.add_development_dependency "em-http-request", "= 1.0.0.beta.3"
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
